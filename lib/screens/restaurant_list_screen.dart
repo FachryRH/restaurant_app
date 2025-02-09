@@ -29,17 +29,14 @@ class RestaurantListState extends State<RestaurantList> {
       appBar: AppBar(
         title: const Text('Restaurant App'),
         actions: [
-          // Tombol search atau lainnya bisa ditambahkan di sini
           Consumer<ThemeProvider>(
             builder: (context, themeProvider, _) {
               return IconButton(
-                // Tampilkan ikon matahari jika mode saat ini adalah dark, dan sebaliknya
                 icon: Icon(
                   themeProvider.themeMode == ThemeMode.dark ? Icons.wb_sunny : Icons.nights_stay,
                   color: Colors.white,
                 ),
                 onPressed: () {
-                  // Toggle mode berdasarkan mode saat ini
                   themeProvider.toggleTheme(themeProvider.themeMode != ThemeMode.dark);
                 },
               );
