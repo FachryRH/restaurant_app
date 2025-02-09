@@ -131,13 +131,43 @@ class RestaurantDetailPageState extends State<RestaurantDetailPage> {
             return SingleChildScrollView(
               child: Column(
                 children: [
-                  Hero(
-                    tag: 'image-${widget.restaurant.id}',
-                    child: Image.network(
-                      'https://restaurant-api.dicoding.dev/images/large/${widget.restaurant.pictureId}',
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      double maxImageHeight = constraints.maxWidth > 600 ? 300 : 400;
+                      return Hero(
+                        tag: 'image-${widget.restaurant.id}',
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(maxHeight: maxImageHeight),
+                          child: Stack(
+                            children: [
+                              Image.network(
+                                'https://restaurant-api.dicoding.dev/images/large/${widget.restaurant.pictureId}',
+                                width: double.infinity,
+                                fit: BoxFit.contain,
+                              ),
+                              Positioned(
+                                bottom: 0,
+                                left: 0,
+                                right: 0,
+                                height: 50,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Colors.transparent,
+                                        Colors.black.withAlpha((0.5 * 255).round()),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 16),
                   Center(child: loadingLottie()),
@@ -150,13 +180,43 @@ class RestaurantDetailPageState extends State<RestaurantDetailPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Hero(
-                    tag: 'image-${widget.restaurant.id}',
-                    child: Image.network(
-                      'https://restaurant-api.dicoding.dev/images/large/${widget.restaurant.pictureId}',
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      double maxImageHeight = constraints.maxWidth > 600 ? 300 : 400;
+                      return Hero(
+                        tag: 'image-${widget.restaurant.id}',
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(maxHeight: maxImageHeight),
+                          child: Stack(
+                            children: [
+                              Image.network(
+                                'https://restaurant-api.dicoding.dev/images/large/${widget.restaurant.pictureId}',
+                                width: double.infinity,
+                                fit: BoxFit.contain,
+                              ),
+                              Positioned(
+                                bottom: 0,
+                                left: 0,
+                                right: 0,
+                                height: 50,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Colors.transparent,
+                                        Colors.black.withAlpha((0.5 * 255).round()),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
                   Padding(
                     padding: const EdgeInsets.all(16),
