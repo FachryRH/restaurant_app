@@ -4,6 +4,7 @@ import 'package:restaurant_app/models/restaurant.dart';
 import 'package:restaurant_app/providers/restaurant_provider.dart';
 import 'package:restaurant_app/providers/theme_provider.dart';
 import 'package:restaurant_app/screens/restaurant_detail_screen.dart';
+import 'package:restaurant_app/screens/search_screen.dart';
 import 'package:restaurant_app/widgets/loading_indicator.dart';
 import 'package:restaurant_app/widgets/error_message.dart';
 
@@ -20,7 +21,29 @@ class RestaurantListState extends State<RestaurantList> {
   @override
   void initState() {
     super.initState();
-    _fetchFuture = Provider.of<RestaurantProvider>(context, listen: false).fetchRestaurants();
+    _fetchFuture = Provider.of<RestaurantProvider>(context, listen: false)
+        .fetchRestaurants();
+  }
+
+  Widget _buildError(String message) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ErrorMessage(message: message),
+          const SizedBox(height: 8),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                _fetchFuture = Provider.of<RestaurantProvider>(context, listen: false)
+                    .fetchRestaurants();
+              });
+            },
+            child: const Text('Coba Lagi'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -29,11 +52,22 @@ class RestaurantListState extends State<RestaurantList> {
       appBar: AppBar(
         title: const Text('Restaurant App'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SearchPage()),
+              );
+            },
+          ),
           Consumer<ThemeProvider>(
             builder: (context, themeProvider, _) {
               return IconButton(
                 icon: Icon(
-                  themeProvider.themeMode == ThemeMode.dark ? Icons.wb_sunny : Icons.nights_stay,
+                  themeProvider.themeMode == ThemeMode.dark
+                      ? Icons.wb_sunny
+                      : Icons.nights_stay,
                   color: Colors.white,
                 ),
                 onPressed: () {
@@ -50,16 +84,17 @@ class RestaurantListState extends State<RestaurantList> {
           final provider = Provider.of<RestaurantProvider>(context);
           if (provider.restaurantsState is Loading) {
             return Center(child: loadingLottie());
-          } else if (provider.restaurantsState is Success) {
+          } else if (provider.restaurantsState is Success<List<Restaurant>>) {
             final restaurants = (provider.restaurantsState as Success<List<Restaurant>>).data;
             return ListView.builder(
               itemCount: restaurants.length,
               itemBuilder: (context, index) {
-                return RestaurantItem(restaurant: restaurants[index]);
+                final restaurant = restaurants[index];
+                return RestaurantItem(restaurant: restaurant);
               },
             );
           } else if (provider.restaurantsState is Error) {
-            return ErrorMessage(message: (provider.restaurantsState as Error).message);
+            return _buildError((provider.restaurantsState as Error).message);
           } else {
             return const Center(child: Text('Unknown state'));
           }

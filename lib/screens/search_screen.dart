@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:restaurant_app/models/restaurant.dart';
 import 'package:restaurant_app/providers/restaurant_provider.dart';
-import 'package:restaurant_app/screens/restaurant_list_screen.dart';
 import 'package:restaurant_app/widgets/loading_indicator.dart';
+import 'package:restaurant_app/screens/restaurant_list_screen.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -46,16 +46,25 @@ class SearchPageState extends State<SearchPage> {
       ),
       body: Consumer<RestaurantProvider>(
         builder: (context, provider, _) {
-          if (provider.searchState is Loading) return loadingLottie();
-          if (provider.searchState is Error) return const Center(child: Text('Error'));
-          final restaurants = (provider.searchState as Success<List<Restaurant>>).data;
-          return ListView.builder(
-            itemCount: restaurants.length,
-            itemBuilder: (context, index) {
-              final restaurant = restaurants[index];
-              return RestaurantItem(restaurant: restaurant);
-            },
-          );
+          if (provider.searchState is Loading) {
+            return Center(child: loadingLottie());
+          } else if (provider.searchState is Error) {
+            return const Center(child: Text('Error loading search results'));
+          } else if (provider.searchState is Success<List<Restaurant>>) {
+            final restaurants = (provider.searchState as Success<List<Restaurant>>).data;
+            if (restaurants.isEmpty) {
+              return const Center(child: Text('No restaurants found'));
+            }
+            return ListView.builder(
+              itemCount: restaurants.length,
+              itemBuilder: (context, index) {
+                final restaurant = restaurants[index];
+                return RestaurantItem(restaurant: restaurant);
+              },
+            );
+          } else {
+            return const Center(child: Text('Start typing to search'));
+          }
         },
       ),
     );
