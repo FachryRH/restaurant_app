@@ -4,22 +4,21 @@ import 'package:provider/provider.dart';
 import 'package:restaurant_app/models/restaurant.dart';
 import 'package:restaurant_app/providers/restaurant_provider.dart';
 import 'package:restaurant_app/widgets/loading_indicator.dart';
-import 'package:restaurant_app/screens/restaurant_list_screen.dart';
+import 'package:restaurant_app/screens/restaurant_list_screen.dart'; // Untuk widget RestaurantItem
 
-class SearchPage extends StatefulWidget {
-  const SearchPage({super.key});
+class SearchScreen extends StatefulWidget {
+  const SearchScreen({super.key});
 
   @override
-  SearchPageState createState() => SearchPageState();
+  SearchScreenState createState() => SearchScreenState();
 }
 
-class SearchPageState extends State<SearchPage> {
+class SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
 
-  double _selectedRating = 0.0; // Range 0.0 - 5.0
+  double _selectedRating = 0.0;
   String _selectedCity = "All";
-  final List<String> cities = ["All", "Medan", "Gorontalo", "Jakarta", "Bandung"];
 
   @override
   void dispose() {
@@ -28,14 +27,27 @@ class SearchPageState extends State<SearchPage> {
     super.dispose();
   }
 
+  List<String> _getUniqueCities(RestaurantProvider provider) {
+    if (provider.restaurantsState is Success<List<Restaurant>>) {
+      final restaurants =
+          (provider.restaurantsState as Success<List<Restaurant>>).data;
+      final citySet = restaurants.map((r) => r.city).toSet();
+      final cities = citySet.toList()..sort();
+      return ["All", ...cities];
+    }
+    return ["All"];
+  }
+
   void _triggerSearch() {
     final query = _searchController.text;
-    if (query.isNotEmpty || _selectedRating > 0.0 || _selectedCity.toLowerCase() != 'all') {
+    if (query.isNotEmpty ||
+        _selectedRating > 0.0 ||
+        _selectedCity.toLowerCase() != 'all') {
       context.read<RestaurantProvider>().searchRestaurants(
-        query,
-        minRating: _selectedRating,
-        city: _selectedCity,
-      );
+            query,
+            minRating: _selectedRating,
+            city: _selectedCity,
+          );
     }
   }
 
@@ -48,6 +60,9 @@ class SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    final restaurantProvider = Provider.of<RestaurantProvider>(context);
+    final List<String> cities = _getUniqueCities(restaurantProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: TextField(
@@ -78,7 +93,8 @@ class SearchPageState extends State<SearchPage> {
                           });
                           _triggerSearch();
                         },
-                        items: cities.map<DropdownMenuItem<String>>((String city) {
+                        items:
+                            cities.map<DropdownMenuItem<String>>((String city) {
                           return DropdownMenuItem<String>(
                             value: city,
                             child: Text(city),
@@ -122,17 +138,20 @@ class SearchPageState extends State<SearchPage> {
                     _selectedRating == 0.0 &&
                     _selectedCity.toLowerCase() == 'all') {
                   return const Center(
-                    child: Text('Masukkan kata kunci pencarian atau pilih filter'),
-                  );
+                      child: Text(
+                          'Masukkan kata kunci pencarian atau pilih filter'));
                 }
                 if (provider.searchState is Loading) {
                   return Center(child: loadingLottie());
                 } else if (provider.searchState is Error) {
-                  return const Center(child: Text('Error loading search results'));
+                  return const Center(
+                      child: Text('Terjadi kesalahan. Silakan coba lagi.'));
                 } else if (provider.searchState is Success<List<Restaurant>>) {
-                  final restaurants = (provider.searchState as Success<List<Restaurant>>).data;
+                  final restaurants =
+                      (provider.searchState as Success<List<Restaurant>>).data;
                   if (restaurants.isEmpty) {
-                    return const Center(child: Text('No restaurants found'));
+                    return const Center(
+                        child: Text('Restoran tidak ditemukan'));
                   }
                   return ListView.builder(
                     itemCount: restaurants.length,

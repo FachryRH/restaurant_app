@@ -9,24 +9,10 @@ class ErrorMessage extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              'assets/images/error.png',
-              width: 150,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.red,
-                fontFamily: 'Poppins',
-              ),
-            ),
-          ],
+        child: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 16, color: Colors.red),
         ),
       ),
     );

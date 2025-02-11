@@ -5,25 +5,26 @@ import 'package:restaurant_app/providers/restaurant_provider.dart';
 import 'package:restaurant_app/widgets/loading_indicator.dart';
 import 'package:restaurant_app/widgets/error_message.dart';
 
-class RestaurantDetailPage extends StatefulWidget {
+class RestaurantDetailScreen extends StatefulWidget {
   final Restaurant restaurant;
-  const RestaurantDetailPage({super.key, required this.restaurant});
+  const RestaurantDetailScreen({super.key, required this.restaurant});
 
   @override
-  RestaurantDetailPageState createState() => RestaurantDetailPageState();
+  RestaurantDetailScreenState createState() => RestaurantDetailScreenState();
 }
 
-class RestaurantDetailPageState extends State<RestaurantDetailPage> {
-  late Future<void> _fetchDetailFuture;
-  final _nameController = TextEditingController();
-  final _reviewController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+class RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _reviewController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
-    _fetchDetailFuture = Provider.of<RestaurantProvider>(context, listen: false)
-        .fetchRestaurantDetail(widget.restaurant.id);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<RestaurantProvider>(context, listen: false)
+          .fetchRestaurantDetail(widget.restaurant.id);
+    });
   }
 
   @override
@@ -56,22 +57,22 @@ class RestaurantDetailPageState extends State<RestaurantDetailPage> {
         ),
         const SizedBox(height: 8),
         ...reviews.map((review) => Card(
-          margin: const EdgeInsets.symmetric(vertical: 4),
-          child: ListTile(
-            title: Text(review.name),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(review.review),
-                const SizedBox(height: 4),
-                Text(
-                  review.date,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+              margin: const EdgeInsets.symmetric(vertical: 4),
+              child: ListTile(
+                title: Text(review.name),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(review.review),
+                    const SizedBox(height: 4),
+                    Text(
+                      review.date,
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-        )),
+              ),
+            )),
       ],
     );
   }
@@ -94,7 +95,7 @@ class RestaurantDetailPageState extends State<RestaurantDetailPage> {
               border: OutlineInputBorder(),
             ),
             validator: (value) =>
-            value == null || value.isEmpty ? 'Nama harus diisi' : null,
+                (value == null || value.isEmpty) ? 'Nama harus diisi' : null,
           ),
           const SizedBox(height: 8),
           TextFormField(
@@ -105,7 +106,7 @@ class RestaurantDetailPageState extends State<RestaurantDetailPage> {
             ),
             maxLines: 3,
             validator: (value) =>
-            value == null || value.isEmpty ? 'Ulasan harus diisi' : null,
+                (value == null || value.isEmpty) ? 'Ulasan harus diisi' : null,
           ),
           const SizedBox(height: 8),
           ElevatedButton(
@@ -123,96 +124,36 @@ class RestaurantDetailPageState extends State<RestaurantDetailPage> {
       appBar: AppBar(
         title: const Text('Detail Restoran'),
       ),
-      body: FutureBuilder(
-        future: _fetchDetailFuture,
-        builder: (context, snapshot) {
-          final provider = Provider.of<RestaurantProvider>(context);
-          if (provider.restaurantDetailState is Loading) {
-            return SingleChildScrollView(
-              child: Column(
-                children: [
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      double maxImageHeight = constraints.maxWidth > 600 ? 300 : 400;
-                      return Hero(
-                        tag: 'image-${widget.restaurant.id}',
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(maxHeight: maxImageHeight),
-                          child: Stack(
-                            children: [
-                              Image.network(
-                                'https://restaurant-api.dicoding.dev/images/large/${widget.restaurant.pictureId}',
-                                width: double.infinity,
-                                fit: BoxFit.contain,
-                              ),
-                              Positioned(
-                                bottom: 0,
-                                left: 0,
-                                right: 0,
-                                height: 50,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        Colors.transparent,
-                                        Colors.black.withAlpha((0.5 * 255).round()),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  Center(child: loadingLottie()),
-                ],
-              ),
-            );
-          } else if (provider.restaurantDetailState is Success) {
-            final restaurant = (provider.restaurantDetailState as Success<RestaurantDetail>).data;
+      body: Consumer<RestaurantProvider>(
+        builder: (context, provider, _) {
+          final state = provider.restaurantDetailState;
+          if (state is Loading<RestaurantDetail>) {
+            return Center(child: loadingLottie());
+          } else if (state is Success<RestaurantDetail>) {
+            final detail = state.data;
             return SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   LayoutBuilder(
                     builder: (context, constraints) {
-                      double maxImageHeight = constraints.maxWidth > 600 ? 300 : 400;
-                      return Hero(
-                        tag: 'image-${widget.restaurant.id}',
+                      final bool isDesktop = constraints.maxWidth > 800;
+                      final double maxImageHeight = isDesktop ? 400 : 600;
+                      final double maxImageWidth =
+                          isDesktop ? 800 : constraints.maxWidth;
+                      return Center(
                         child: ConstrainedBox(
-                          constraints: BoxConstraints(maxHeight: maxImageHeight),
-                          child: Stack(
-                            children: [
-                              Image.network(
-                                'https://restaurant-api.dicoding.dev/images/large/${widget.restaurant.pictureId}',
-                                width: double.infinity,
-                                fit: BoxFit.contain,
-                              ),
-                              Positioned(
-                                bottom: 0,
-                                left: 0,
-                                right: 0,
-                                height: 50,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        Colors.transparent,
-                                        Colors.black.withAlpha((0.5 * 255).round()),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                          constraints: BoxConstraints(
+                            maxWidth: maxImageWidth,
+                            maxHeight: maxImageHeight,
+                          ),
+                          child: Hero(
+                            tag: 'image-${widget.restaurant.id}',
+                            child: Image.network(
+                              'https://restaurant-api.dicoding.dev/images/large/${widget.restaurant.pictureId}',
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                       );
@@ -228,7 +169,7 @@ class RestaurantDetailPageState extends State<RestaurantDetailPage> {
                           child: Material(
                             type: MaterialType.transparency,
                             child: Text(
-                              restaurant.name,
+                              detail.name,
                               style: Theme.of(context).textTheme.headlineSmall,
                             ),
                           ),
@@ -238,26 +179,39 @@ class RestaurantDetailPageState extends State<RestaurantDetailPage> {
                           children: [
                             const Icon(Icons.location_on, size: 16),
                             const SizedBox(width: 4),
-                            Text('${restaurant.city} • ${restaurant.address}'),
+                            Text('${detail.city} • ${detail.address}'),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            const Icon(Icons.star,
+                                color: Colors.amber, size: 16),
+                            const SizedBox(width: 4),
+                            Text('Rating: ${detail.rating}',
+                                style: Theme.of(context).textTheme.bodyMedium),
                           ],
                         ),
                         const SizedBox(height: 16),
-                        Text(restaurant.description),
+                        Text(
+                          detail.description,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
                         const SizedBox(height: 16),
                         ExpansionTile(
                           title: const Text('Menu Makanan'),
-                          children: restaurant.menus.foods
+                          children: detail.menus.foods
                               .map((food) => ListTile(title: Text(food.name)))
                               .toList(),
                         ),
                         ExpansionTile(
                           title: const Text('Menu Minuman'),
-                          children: restaurant.menus.drinks
+                          children: detail.menus.drinks
                               .map((drink) => ListTile(title: Text(drink.name)))
                               .toList(),
                         ),
                         const SizedBox(height: 16),
-                        _buildReviewSection(restaurant.customerReviews),
+                        _buildReviewSection(detail.customerReviews),
                         const Divider(),
                         _buildReviewForm(),
                       ],
@@ -266,10 +220,13 @@ class RestaurantDetailPageState extends State<RestaurantDetailPage> {
                 ],
               ),
             );
-          } else if (provider.restaurantDetailState is Error) {
-            return ErrorMessage(message: (provider.restaurantDetailState as Error).message);
+          } else if (state is Error<RestaurantDetail>) {
+            return const ErrorMessage(
+              message:
+                  "Terjadi kesalahan saat memuat detail restoran. Silakan coba lagi.",
+            );
           } else {
-            return const Center(child: Text('Unknown state'));
+            return const Center(child: Text('Data tidak tersedia.'));
           }
         },
       ),

@@ -16,13 +16,13 @@ class Restaurant {
   });
 
   factory Restaurant.fromJson(Map<String, dynamic> json) => Restaurant(
-    id: json["id"],
-    name: json["name"],
-    description: json["description"],
-    pictureId: json["pictureId"],
-    city: json["city"],
-    rating: (json["rating"] as num).toDouble(),
-  );
+        id: json["id"],
+        name: json["name"],
+        description: json["description"],
+        pictureId: json["pictureId"],
+        city: json["city"],
+        rating: (json["rating"] as num).toDouble(),
+      );
 }
 
 class Category {
@@ -33,8 +33,8 @@ class Category {
   });
 
   factory Category.fromJson(Map<String, dynamic> json) => Category(
-    name: json["name"],
-  );
+        name: json["name"],
+      );
 }
 
 class Menus {
@@ -47,11 +47,9 @@ class Menus {
   });
 
   factory Menus.fromJson(Map<String, dynamic> json) => Menus(
-    foods:
-    List<Food>.from(json["foods"].map((x) => Food.fromJson(x))),
-    drinks:
-    List<Drink>.from(json["drinks"].map((x) => Drink.fromJson(x))),
-  );
+        foods: List<Food>.from(json["foods"].map((x) => Food.fromJson(x))),
+        drinks: List<Drink>.from(json["drinks"].map((x) => Drink.fromJson(x))),
+      );
 }
 
 class Food {
@@ -62,8 +60,8 @@ class Food {
   });
 
   factory Food.fromJson(Map<String, dynamic> json) => Food(
-    name: json["name"],
-  );
+        name: json["name"],
+      );
 }
 
 class Drink {
@@ -74,8 +72,8 @@ class Drink {
   });
 
   factory Drink.fromJson(Map<String, dynamic> json) => Drink(
-    name: json["name"],
-  );
+        name: json["name"],
+      );
 }
 
 class CustomerReview {
@@ -89,8 +87,7 @@ class CustomerReview {
     required this.date,
   });
 
-  factory CustomerReview.fromJson(Map<String, dynamic> json) =>
-      CustomerReview(
+  factory CustomerReview.fromJson(Map<String, dynamic> json) => CustomerReview(
         name: json["name"],
         review: json["review"],
         date: json["date"],
@@ -134,7 +131,7 @@ class RestaurantDetail {
         categories: List<Category>.from(
             json["categories"].map((x) => Category.fromJson(x))),
         menus: Menus.fromJson(json["menus"]),
-        customerReviews: List<CustomerReview>.from(json["customerReviews"]
-            .map((x) => CustomerReview.fromJson(x))),
+        customerReviews: List<CustomerReview>.from(
+            json["customerReviews"].map((x) => CustomerReview.fromJson(x))),
       );
 }

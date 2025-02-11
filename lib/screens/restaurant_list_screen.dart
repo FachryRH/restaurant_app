@@ -8,42 +8,21 @@ import 'package:restaurant_app/screens/search_screen.dart';
 import 'package:restaurant_app/widgets/loading_indicator.dart';
 import 'package:restaurant_app/widgets/error_message.dart';
 
-class RestaurantList extends StatefulWidget {
-  const RestaurantList({super.key});
+class RestaurantListScreen extends StatefulWidget {
+  const RestaurantListScreen({super.key});
 
   @override
-  RestaurantListState createState() => RestaurantListState();
+  RestaurantListScreenState createState() => RestaurantListScreenState();
 }
 
-class RestaurantListState extends State<RestaurantList> {
-  late Future<void> _fetchFuture;
-
+class RestaurantListScreenState extends State<RestaurantListScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchFuture = Provider.of<RestaurantProvider>(context, listen: false)
-        .fetchRestaurants();
-  }
-
-  Widget _buildError(String message) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ErrorMessage(message: message),
-          const SizedBox(height: 8),
-          ElevatedButton(
-            onPressed: () {
-              setState(() {
-                _fetchFuture = Provider.of<RestaurantProvider>(context, listen: false)
-                    .fetchRestaurants();
-              });
-            },
-            child: const Text('Coba Lagi'),
-          ),
-        ],
-      ),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<RestaurantProvider>(context, listen: false)
+          .fetchRestaurants();
+    });
   }
 
   @override
@@ -57,7 +36,7 @@ class RestaurantListState extends State<RestaurantList> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const SearchPage()),
+                MaterialPageRoute(builder: (context) => const SearchScreen()),
               );
             },
           ),
@@ -71,21 +50,21 @@ class RestaurantListState extends State<RestaurantList> {
                   color: Colors.white,
                 ),
                 onPressed: () {
-                  themeProvider.toggleTheme(themeProvider.themeMode != ThemeMode.dark);
+                  themeProvider
+                      .toggleTheme(themeProvider.themeMode != ThemeMode.dark);
                 },
               );
             },
           ),
         ],
       ),
-      body: FutureBuilder(
-        future: _fetchFuture,
-        builder: (context, snapshot) {
-          final provider = Provider.of<RestaurantProvider>(context);
-          if (provider.restaurantsState is Loading) {
+      body: Consumer<RestaurantProvider>(
+        builder: (context, provider, _) {
+          final state = provider.restaurantsState;
+          if (state is Loading<List<Restaurant>>) {
             return Center(child: loadingLottie());
-          } else if (provider.restaurantsState is Success<List<Restaurant>>) {
-            final restaurants = (provider.restaurantsState as Success<List<Restaurant>>).data;
+          } else if (state is Success<List<Restaurant>>) {
+            final restaurants = state.data;
             return ListView.builder(
               itemCount: restaurants.length,
               itemBuilder: (context, index) {
@@ -93,10 +72,13 @@ class RestaurantListState extends State<RestaurantList> {
                 return RestaurantItem(restaurant: restaurant);
               },
             );
-          } else if (provider.restaurantsState is Error) {
-            return _buildError((provider.restaurantsState as Error).message);
+          } else if (state is Error<List<Restaurant>>) {
+            return const ErrorMessage(
+              message:
+                  "Terjadi kesalahan saat memuat data restoran. Silakan coba lagi.",
+            );
           } else {
-            return const Center(child: Text('Unknown state'));
+            return const Center(child: Text("Data tidak tersedia."));
           }
         },
       ),
@@ -133,7 +115,8 @@ class RestaurantItem extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => RestaurantDetailPage(restaurant: restaurant),
+              builder: (context) =>
+                  RestaurantDetailScreen(restaurant: restaurant),
             ),
           );
         },

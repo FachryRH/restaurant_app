@@ -5,11 +5,14 @@ import 'package:restaurant_app/services/api_service.dart';
 import 'package:http/http.dart' as http;
 
 sealed class ResultState<T> {}
+
 class Loading<T> extends ResultState<T> {}
+
 class Success<T> extends ResultState<T> {
   final T data;
   Success(this.data);
 }
+
 class Error<T> extends ResultState<T> {
   final String message;
   Error(this.message);
@@ -25,7 +28,8 @@ class RestaurantProvider extends ChangeNotifier {
   ResultState<List<Restaurant>> get restaurantsState => _restaurantsState;
 
   ResultState<RestaurantDetail> _restaurantDetailState = Loading();
-  ResultState<RestaurantDetail> get restaurantDetailState => _restaurantDetailState;
+  ResultState<RestaurantDetail> get restaurantDetailState =>
+      _restaurantDetailState;
 
   ResultState<List<Restaurant>> _searchState = Loading();
   ResultState<List<Restaurant>> get searchState => _searchState;
@@ -54,7 +58,8 @@ class RestaurantProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> searchRestaurants(String query, {double? minRating, String? city}) async {
+  Future<void> searchRestaurants(String query,
+      {double? minRating, String? city}) async {
     _searchState = Loading();
     notifyListeners();
     try {
@@ -65,10 +70,13 @@ class RestaurantProvider extends ChangeNotifier {
             .map((data) => Restaurant.fromJson(data))
             .toList();
         if (minRating != null) {
-          restaurants = restaurants.where((r) => r.rating >= minRating).toList();
+          restaurants =
+              restaurants.where((r) => r.rating >= minRating).toList();
         }
         if (city != null && city.toLowerCase() != 'all') {
-          restaurants = restaurants.where((r) => r.city.toLowerCase() == city.toLowerCase()).toList();
+          restaurants = restaurants
+              .where((r) => r.city.toLowerCase() == city.toLowerCase())
+              .toList();
         }
         _searchState = Success(restaurants);
       } else {
@@ -82,7 +90,8 @@ class RestaurantProvider extends ChangeNotifier {
 
   Future<void> addReview(String id, String name, String review) async {
     if (_restaurantDetailState is Success<RestaurantDetail>) {
-      final currentDetail = (_restaurantDetailState as Success<RestaurantDetail>).data;
+      final currentDetail =
+          (_restaurantDetailState as Success<RestaurantDetail>).data;
 
       final newReview = CustomerReview(
         name: name,
@@ -90,8 +99,9 @@ class RestaurantProvider extends ChangeNotifier {
         date: DateTime.now().toString(),
       );
 
-      final updatedReviews = List<CustomerReview>.from(currentDetail.customerReviews)
-        ..insert(0, newReview);
+      final updatedReviews =
+          List<CustomerReview>.from(currentDetail.customerReviews)
+            ..insert(0, newReview);
 
       final updatedDetail = RestaurantDetail(
         id: currentDetail.id,
@@ -112,7 +122,8 @@ class RestaurantProvider extends ChangeNotifier {
     try {
       final responseReviews = await apiService.addReview(id, name, review);
       if (_restaurantDetailState is Success<RestaurantDetail>) {
-        final currentDetail = (_restaurantDetailState as Success<RestaurantDetail>).data;
+        final currentDetail =
+            (_restaurantDetailState as Success<RestaurantDetail>).data;
         final updatedDetail = RestaurantDetail(
           id: currentDetail.id,
           name: currentDetail.name,

@@ -11,7 +11,8 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => RestaurantProvider(apiService: ApiService())),
+        ChangeNotifierProvider(
+            create: (_) => RestaurantProvider(apiService: ApiService())),
       ],
       child: const MyApp(),
     ),
@@ -30,7 +31,7 @@ class MyApp extends StatelessWidget {
           theme: lightTheme,
           darkTheme: darkTheme,
           themeMode: themeProvider.themeMode,
-          home: const RestaurantList(),
+          home: const RestaurantListScreen(),
         );
       },
     );

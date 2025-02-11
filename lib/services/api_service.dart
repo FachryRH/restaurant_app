@@ -18,7 +18,8 @@ class ApiService {
             .map((json) => Restaurant.fromJson(json))
             .toList();
       } else {
-        throw Exception('Gagal mengambil data restoran (Code: ${response.statusCode})');
+        throw Exception(
+            'Gagal mengambil data restoran (Code: ${response.statusCode})');
       }
     } catch (e) {
       throw Exception('Terjadi kesalahan: $e');
@@ -36,20 +37,24 @@ class ApiService {
         final data = json.decode(response.body);
         return RestaurantDetail.fromJson(data['restaurant']);
       } else {
-        throw Exception('Gagal mengambil detail restoran (Code: ${response.statusCode})');
+        throw Exception(
+            'Gagal mengambil detail restoran (Code: ${response.statusCode})');
       }
     } catch (e) {
       throw Exception('Terjadi kesalahan: $e');
     }
   }
 
-  Future<List<CustomerReview>> addReview(String id, String name, String review) async {
+  Future<List<CustomerReview>> addReview(
+      String id, String name, String review) async {
     try {
-      final response = await http.post(
-        Uri.parse('${_baseUrl}review'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({"id": id, "name": name, "review": review}),
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .post(
+            Uri.parse('${_baseUrl}review'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({"id": id, "name": name, "review": review}),
+          )
+          .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -57,7 +62,8 @@ class ApiService {
             .map((json) => CustomerReview.fromJson(json))
             .toList();
       } else {
-        throw Exception('Gagal menambahkan review (Code: ${response.statusCode})');
+        throw Exception(
+            'Gagal menambahkan review (Code: ${response.statusCode})');
       }
     } catch (e) {
       throw Exception('Terjadi kesalahan saat menambahkan review: $e');
