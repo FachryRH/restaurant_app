@@ -63,25 +63,29 @@ class RestaurantProvider extends ChangeNotifier {
     _searchState = Loading();
     notifyListeners();
     try {
-      final response = await http.get(Uri.parse('$_baseUrl/search?q=$query'));
-      if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body);
-        List<Restaurant> restaurants = (jsonData['restaurants'] as List)
-            .map((data) => Restaurant.fromJson(data))
-            .toList();
-        if (minRating != null) {
-          restaurants =
-              restaurants.where((r) => r.rating >= minRating).toList();
-        }
-        if (city != null && city.toLowerCase() != 'all') {
-          restaurants = restaurants
-              .where((r) => r.city.toLowerCase() == city.toLowerCase())
-              .toList();
-        }
-        _searchState = Success(restaurants);
+      List<Restaurant> restaurants;
+      if (query.trim().isEmpty) {
+        restaurants = await apiService.getRestaurants();
       } else {
-        throw Exception('Failed to load restaurants');
+        final response = await http.get(Uri.parse('$_baseUrl/search?q=$query'));
+        if (response.statusCode == 200) {
+          final jsonData = json.decode(response.body);
+          restaurants = (jsonData['restaurants'] as List)
+              .map((data) => Restaurant.fromJson(data))
+              .toList();
+        } else {
+          throw Exception('Failed to load restaurants');
+        }
       }
+      if (minRating != null) {
+        restaurants = restaurants.where((r) => r.rating >= minRating).toList();
+      }
+      if (city != null && city.toLowerCase() != 'all') {
+        restaurants = restaurants
+            .where((r) => r.city.toLowerCase() == city.toLowerCase())
+            .toList();
+      }
+      _searchState = Success(restaurants);
     } catch (e) {
       _searchState = Error(e.toString());
     }
